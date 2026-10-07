@@ -1,0 +1,47 @@
+services:
+  app:
+    image: python:3.13.14-trixie
+    command: "bash -c 'pip install -r requirements.txt && python main.py'"
+    working_dir: /app
+    environment:
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./:/app
+    ports:
+      - 8080:8080
+
+  db-example:
+    image: postgres:18
+    # .env.local -> dans le gitignore
+    env_file: .env.local # Passer les variables d'env par fichier
+    environment: # Soit les passer directement.
+      POSTGRES_DB: app
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: 1234
+
+    ports:
+      # Port forward PORT_HOTE->PORT_CONTAINER
+      # PORT_HOTE:PORT_CONTAINER
+      # Dans ce cas le port 127.0.0.1:5435
+      - '5435:5432'
+
+    volumes:
+      # DOSSIER_HOTE:DOSSIER_CONTAINER
+      - ./init_db:/init_db
+      - app-volume:/var/lib/postgresql/18/docker
+
+  # Serveur SMTP "bouchon" pour le développement.
+  # Mailpit accepte tous les mails et n'en envoie AUCUN: il les garde et les
+  # affiche dans une interface web. Indispensable pour travailler sur des envois
+  # (mot de passe oublié, notifications...) sans risquer d'écrire à de vrais
+  # destinataires — et sans compte SMTP à configurer.
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      # 1025 = SMTP: c'est là que l'application dépose ses mails (MAIL_PORT)
+      - '1025:1025'
+      # 8025 = interface web: http://localhost:8025 pour lire les mails reçus
+      - '8025:8025'
+
+volumes:
+  app-volume:

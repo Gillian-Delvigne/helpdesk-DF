@@ -1,0 +1,40 @@
+{% from "macros/_icon_macros.html" import icon %}
+
+{% macro modal(title="", subtitle="", confirm_label="Supprimer", cancel_label="Annuler") %}
+
+<div id="modalOverlay"
+	class="hidden fixed inset-0 p-4 flex flex-wrap justify-center items-center w-full h-full z-[1000] before:fixed before:inset-0 before:w-full before:h-full before:bg-[rgba(0,0,0,0.5)]">
+
+	<div role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1"
+		class="dialog-box w-full max-w-lg bg-white border border-slate-100 shadow-lg rounded-lg relative max-h-[95vh] overflow-y-auto outline-none p-4 md:p-6">
+
+		<button type="button" aria-label="Close modal"
+			class="modalCloseBtn flex items-center absolute top-6 right-6 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded">
+			{{ icon(type="close") }}
+		</button>
+
+		<div>
+			<div class="flex w-full items-center gap-4">
+				<div class="w-12 h-12 p-3 mb-4 rounded-full bg-red-50">
+					{{ icon(type="delete-circle") }}
+				</div>
+			</div>
+			<h3 class="modal-title text-slate-900 text-base font-semibold ">{{ title }}</h3>
+			<p class="text-slate-600 text-sm mt-2 leading-relaxed">{{ subtitle }}</p>
+		</div>
+
+		<div class="flex justify-end gap-4 mt-6">
+			<button type="button"
+				class="modalCancelBtn px-3.5 py-2 text-slate-900 text-sm font-semibold rounded-md cursor-pointer bg-white border border-slate-300 transition-colors hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+				{{ cancel_label }}</button>
+			<form method="post" id="modalConfirmForm">
+				<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+				<button type="submit"
+					class="modalConfirmBtn px-3.5 py-2 text-white text-sm font-semibold rounded-md cursor-pointer bg-red-600 border border-red-600 transition-colors hover:bg-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+					{{ confirm_label }}</button>
+			</form>
+		</div>
+	</div>
+</div>
+
+{% endmacro %}

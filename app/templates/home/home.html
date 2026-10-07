@@ -1,0 +1,20 @@
+{% extends "layout/main_layout.html" %}
+{% block content %}
+<section class="relative grow flex overflow-hidden bg-gradient-to-br from-indigo-800 to-indigo-500">
+	<div class="flex w-full grow flex flex-col md:flex-row items-center md:justify-between">
+		<div class="flex w-full md:w-3/5 px-8 py-40 md:px-16 lg:px-40">
+			<div>
+				<span class="h-36 w-fit py-4 px-6 bg-indigo-800 rounded-full text-indigo-200 shadow-md">Solution de
+					Ticketing Intégrée</span>
+				<h1 class="text-6xl font-bold text-white mt-8 inter-bold">Bienvenue sur HelpDesk</h1>
+				<p class="text-white text-2xl mt-6 inter-normal tracking-wide">Déclarez un incident, suivez sa
+					résolution,
+					en toute transparence.</p>
+			</div>
+		</div>
+		<div class="flex w-full md:w-2/5 h-full items-center p-12 bg-indigo-800">
+			<img class="w-120 m-auto" src="{{ url_for('static', filename='/img/helpdesk-cover.png') }}" alt="">
+		</div>
+	</div>
+</section>
+{% endblock %}

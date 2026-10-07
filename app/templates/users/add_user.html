@@ -1,0 +1,44 @@
+{% extends "layout/main_layout.html" %}
+{% from "macros/_form_macros.html" import input_field with context %}
+{% from "macros/_icon_macros.html" import icon with context %}
+
+{% block content %}
+<section class="flex flex-col grow bg-gradient-to-br from-indigo-800 to-indigo-500">
+	<div class="flex items-center justify-center mx-auto my-8 w-full grow px-4">
+		<div class="mx-auto px-6 sm:px-12 py-8 bg-gray-100 rounded-md shadow-xl h-fit w-full max-w-2xl min-w-sm">
+			<div>
+				<h2 class="text-2xl">Créer un utilisateur</h2>
+				<hr class="px-12 mt-2 text-gray-300">
+			</div>
+			<form method="post" class="flex flex-col">
+				{{ form.hidden_tag() }}
+				<div class="flex flex-col sm:flex-row gap-6 p-6">
+					{{ input_field(form.name, placeholder="utilisateur_42") }}
+					{{ input_field(form.email,
+					type="email",
+					placeholder="utilisateur@exemple.com") }}
+				</div>
+				<div class="flex flex-col sm:flex-row gap-6 p-6">
+					{{ input_field(form.password, type="password") }}
+					{{ input_field(form.confirm, type="password") }}
+				</div>
+				<div class="flex flex-col sm:flex-row gap-6 p-6">
+					{{ input_field(form.firstname, placeholder="Jean")
+					}}
+					{{ input_field(form.lastname, placeholder="Dupont")
+					}}
+				</div>
+			<a href="{{ url_for('list_users') }}"
+				class="bg-red-600 hover:bg-red-800 text-white font-bold py-2 px-4 rounded inline-flex items-center justify-center w-full mt-6">Annuler</a>
+			<button type="submit"
+				<button type="submit"
+					class="bg-indigo-600 hover:bg-indigo-800 text-white font-bold py-2 px-4 rounded inline-flex items-center justify-center w-full my-4">
+					{{icon(type="submit")}}
+					<span>Créer</span>
+				</button>
+			</form>
+		</div>
+	</div>
+</section>
+
+{% endblock %}

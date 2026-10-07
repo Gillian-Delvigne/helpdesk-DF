@@ -1,0 +1,27 @@
+{% from "macros/_icon_macros.html" import icon with context %}
+
+{% set title = {
+	"info": "Information",
+	"success": "Succès",
+	"warning": "Alerte",
+	"error": "Erreur",
+}%}
+
+{% macro notification(type="info", text="")%}
+<div class="notification {{notification_classes[type].bg}} p-4 rounded-md border-b-4 {{notification_classes[type].border}} w-full max-w-md fixed bottom-4 right-4 z-90 animate-slide-in"
+	role="alert">
+	<div class="flex items-start gap-2.5">
+		{{ icon(type=type) }}
+		<div>
+			<p class="text-sm text-slate-900 font-medium leading-tight">{{title[type]}}
+			</p>
+			<p class="text-xs mt-1 text-slate-600">{{text}}</p>
+		</div>
+
+		<button type="button" aria-label="Dismiss notification"
+			class="dismiss-btn ml-auto flex items-center opacity-70 hover:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:{{notification_classes[type].ring}} rounded">
+			{{ icon(type="close") }}
+		</button>
+	</div>
+</div>
+{% endmacro %}

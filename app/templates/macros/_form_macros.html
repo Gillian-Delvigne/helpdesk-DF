@@ -1,0 +1,82 @@
+{% from "macros/_icon_macros.html" import icon %}
+
+{% macro input_field(field, type="text", placeholder="") %}
+<div class="flex flex-col w-full">
+	<label for="{{ field.name }}" class="block text-sm/6 font-medium text-gray-900">{{ field.label }}</label>
+	<div class="mt-2">
+		<div class="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-gray-300 has-[input:focus-within]:outline-2 has-[input:focus-within]:-outline-offset-2 has-[input:focus-within]:outline-indigo-600 {{ "
+			outline-red-500" if field.errors else "" }}">
+			<input type="{{ type }}" name="{{ field.name }}" id="{{ field.name }}" placeholder="{{placeholder}}" value="{{field._value()}}"
+				class="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6 focus-within:placeholder:opacity-0">
+			{% if type == "password" %}
+			<div class="shrink-0 text-base text-gray-400 select-none sm:text-sm/6 pr-2 z-30 eye-icon relative">
+				{{ icon(type="eye", color="black") }}
+				<svg class="eye-slash hidden absolute inset-0 w-4 h-4" viewBox="0 0 24 24">
+					<line x1="3" y1="3" x2="21" y2="21" stroke="black" stroke-width="1.5" stroke-linecap="round"></line>
+				</svg>
+			</div>
+			{% endif %}
+		</div>
+		<div>
+			{% if field.errors %}
+			<ul class="text-sm text-red-500 mt-1">
+				{% for error in field.errors %}
+				<li>{{ error }}</li>
+				{% endfor %}
+			</ul>
+			{% endif %}
+		</div>
+	</div>
+</div>
+{% endmacro %}
+
+{% macro select_field(field) %}
+<div class="flex flex-col w-full">
+	<label for="{{ field.name }}" class="block text-sm/6 font-medium text-gray-900">{{ field.label }}</label>
+	<div class="mt-2">
+		<select name="{{ field.name }}" id="{{ field.name }}"
+			class="block w-full rounded-md bg-white pl-3 pr-10 py-1.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm">
+			{% for option in field.choices %}
+			<option value="{{ option[0] }}">{{ option[1] }}</option>
+			{% endfor %}
+		</select>
+		<div>
+			{% if field.errors %}
+			<ul class="text-sm text-red-500 mt-1">
+				{% for error in field.errors %}
+				<li>{{ error }}</li>
+				{% endfor %}
+			</ul>
+			{% endif %}
+		</div>
+	</div>
+</div>
+{% endmacro %}
+
+
+{% macro textarea_field(field, placeholder="") %}
+<div class="flex flex-col w-full">
+	<label for="{{ field.name }}" class="block text-sm/6 font-medium text-gray-900">{{ field.label }}</label>
+	<div class="flex items-center rounded-md pl-3 mt-2 bg-white outline-1 -outline-offset-1 outline-gray-300 has-[textarea:focus-within]:outline-2 has-[textarea:focus-within]:-outline-offset-2 has-[textarea:focus-within]:outline-indigo-600 {{ "
+		outline-red-500" if field.errors else "" }}">
+		<textarea name="{{ field.name }}" id="{{ field.name }}" placeholder="{{placeholder}}"
+			class="block h-40 min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6 focus-within:placeholder:opacity-0">{{field._value()}}</textarea>
+		</div>
+		<div>
+			{% if field.errors %}
+			<ul class=" text-sm text-red-500 mt-1">
+				{% for error in field.errors %}
+				<li>{{ error }}</li>
+				{% endfor %}
+			</ul>
+			{% endif %}
+		</div>
+</div>
+{% endmacro %}
+
+{% macro checkbox_option(subfield) %}
+<div class="flex items-center gap-2">
+	{{ subfield() }}
+	<label for="{{ subfield.id }}">{{ subfield.label.text }}</label>
+</div>
+{% endmacro %}

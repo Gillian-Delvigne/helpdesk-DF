@@ -1,0 +1,90 @@
+{% from "macros/_navigation_macros.html" import ticket_breadcrumb %}
+
+{% extends "layout/main_layout.html" %}
+
+{% block content %}
+
+<!-- Correction de la balise <section> qui était écrite <setion> -->
+<section class="bg-white flex flex-col grow">
+
+    {{ ticket_breadcrumb(ticket_id) }}
+
+    <div class="mx-auto my-8 w-full">
+        <div class="mx-auto w-2/3 xl:w-1/2 px-12 py-8 bg-gray-100 rounded-md shadow-xl ">
+            
+            <div>
+                <h2 class="text-2xl font-semibold">
+                    Pièces jointes du ticket #{{ ticket_id }}
+                </h2>
+
+                <hr class="mt-2 text-gray-300">
+            </div>
+
+            <!-- Liste des pièces jointes existantes-->
+            <div class="flex flex-col gap-5 mt-6">
+
+               {% if attachments %}
+
+                   {% for attachment in attachments %}
+
+                       <article class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                           
+                           <!-- Conteneur principal parfaitement aligné verticalement -->
+                           <div class="flex flex-row items-center gap-4">
+                               
+                               <p class="text-gray-700 font-medium truncate max-w-[200px] sm:max-w-xs" title="{{ attachment.attachment_filename }}">
+                                   {{ attachment.attachment_filename }}
+                               </p>
+                               
+                            
+                               <p class="text-gray-400 text-sm whitespace-nowrap">
+                                   Taille: {{ ((attachment.attachment_size | int) / (1024*1024) ) | round(2) }} Mo
+                               </p>
+                               
+                               <div class="ml-auto flex flex-row items-center gap-4">
+                                    <a href="{{ url_for('attachment_download', ticket_id=ticket_id, attachment_id=attachment.attachment_id)}}" 
+                                    class="text-green-500 hover:text-red-700 text-sm font-medium focus:outline-none">Télécharger</a>
+                                    
+                                    <span>|</span>
+                                    
+                                    <form action="{{ url_for('attachment_delete', ticket_id=ticket_id, attachment_id=attachment.attachment_id) }}" 
+                                          method="POST" 
+                                          onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette pièce jointe ?');"
+                                          class="flex items-center">
+
+                                        {{ form.hidden_tag() }}          
+                                        
+                                        <button type="submit" class="text-red-500 hover:text-red-700 text-sm font-medium focus:outline-none">
+                                            Supprimer
+                                        </button>            
+                                    </form> 
+                               </div>
+                               
+                           </div>
+
+                       </article>
+
+                   {% endfor %}
+
+                {% else %}
+
+                    <div class="bg-white rounded-lg border border-gray-200 p-8 text-center">
+                        <p class="text-gray-500">
+                            Aucune pièce jointe pour ce ticket.
+                        </p>
+                    </div>
+
+               {% endif %}
+
+            </div>
+
+            <!-- Formulaire pour ajouter une nouvelle pièce jointe-->
+            {% include "attachments/create.html" %}
+             
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}

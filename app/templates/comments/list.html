@@ -1,0 +1,165 @@
+{% from "macros/_navigation_macros.html" import ticket_breadcrumb %}
+
+{% extends "layout/main_layout.html" %}
+
+{% block content %}
+
+<section class="bg-white flex flex-col grow">
+    
+    {{ ticket_breadcrumb(ticket_id) }}
+
+
+    <div class="mx-auto my-8 w-full">
+        <div class="mx-auto w-2/3 xl:w-1/2 px-12 py-8 bg-gray-100 rounded-md shadow-xl">
+
+            <div>
+                <h2 class="text-2xl font-semibold">
+                    Commentaires du <a href="{{url_for('ticket_detail', ticket_id=ticket_id) }}" class="text-gray-400 hover:text-gray-300">ticket #{{ ticket_id }}</a>
+                </h2>
+
+                <hr class="mt-2 text-gray-300">
+            </div>
+
+            <!-- Liste des commentaires existants -->
+            <div class="flex flex-col gap-5 mt-6">
+
+                {% if comments %}
+
+                    {% for comment in comments %}
+
+                        <article class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+
+                            <!-- Auteur + date de création -->
+                            <div class="flex justify-between items-start gap-4">
+
+                                <div class="flex items-center gap-3">
+
+                                    <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
+                                        <span class="text-indigo-700 font-semibold">
+                                            {{ authors_map[comment.author_id][0] if comment.author_id in authors_map else "?" }}
+                                        </span>
+                                    </div>
+
+                                    <div>
+                                        <p class="font-semibold text-gray-900">
+                                            
+                                            {% if comment.author_id in authors_map %}
+                                                {{ authors_map[comment.author_id] }}
+                                            {% else %}
+                                                Auteur #{{ authors_map[comment.author_id] }}
+                                            {% endif %}
+                                            {% if comment.updated_at %}
+                                            <p class="text-sm text-gray-500">
+                                                Mis à jour le
+                                                {{ comment.updated_at.strftime('%d/%m/%Y à %H:%M') }}
+                                            </p>
+                                            {% endif %}
+ 
+                                        </p>
+
+                                        {% if comment.created_at %}
+                                            <p class="text-sm text-gray-500">
+                                                Créé le
+                                                {{ comment.created_at.strftime('%d/%m/%Y à %H:%M') }}
+                                            </p>
+                                        {% endif %}
+                                    </div>
+
+                                </div>
+
+                                <div class="flex items-center gap-4">
+                                    <span class="text-sm text-gray-400">
+                                        #{{ comment.comment_id }}
+                                    </span>
+
+                                    <!-- Formulaire de modification -->
+                                    <a href="{{ url_for('comment_edit', ticket_id=ticket_id, comment_id=comment.comment_id) }}" class="text-green-500 hover:text-green-700 text-sm font-medium focus:outline-none">  
+                                        Modifier
+                                    </a>
+
+                                    <span>|</span>
+
+                                    <!-- Formulaire de suppression -->
+                                    <form action="{{ url_for('comment_delete', ticket_id=ticket_id, comment_id=comment.comment_id) }}" method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce commentaire ?');">
+                                        
+                                        {{ form.hidden_tag() }}
+                                        
+                                        <button type="submit" class="text-red-500 hover:text-red-700 text-sm font-medium focus:outline-none">
+                                            Supprimer
+                                        </button>
+                                    </form>
+                                </div>                                   
+
+                            </div>
+
+                            <!-- Contenu -->
+                            <div class="mt-5">
+                                <p class="text-gray-700 whitespace-pre-line leading-relaxed">
+                                    {{ comment.comment_content }}
+                                </p>
+                            </div>
+
+                            <!-- Date de modification -->
+                            {% if comment.updated_at %}
+                                {% if comment.updated_at != comment.created_at %}
+                                    <div class="mt-5 pt-3 border-t border-gray-100">
+                                        <p class="text-xs text-gray-400">
+                                            Modifié le
+                                            {{ comment.updated_at.strftime('%d/%m/%Y à %H:%M') }}
+                                        </p>
+                                    </div>
+                                {% endif %}
+                            {% endif %}
+
+                        </article>
+
+                    {% endfor %}
+
+                {% else %}
+
+                    <div class="bg-white rounded-lg border border-gray-200 p-8 text-center">
+                        <p class="text-gray-500">
+                            Aucun commentaire pour ce ticket.
+                        </p>
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+            <!-- Formulaire pour AJOUTER un nouveau commentaire -->
+            <div class="mt-8 pt-6 border-t border-gray-300">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">
+                    Ajouter un commentaire
+                </h3>
+                
+                <form action="{{ url_for('comment_create', ticket_id=ticket_id) }}" method="POST" class="flex flex-col gap-4">
+                    
+                    <!-- Protection CSRF -->
+                    {{ form.hidden_tag() }}
+                    
+                    <!-- Zone de saisie textuelle stylisée -->
+                    <div>
+                        <textarea 
+                            name="comment_content" 
+                            rows="4" 
+                            required
+                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-900 placeholder-gray-400 shadow-sm outline-none transition"
+                            placeholder="Écrivez votre message ici..."></textarea>
+                    </div>
+                                            
+                    <!-- Bouton de validation -->
+                    <div class="flex justify-end">
+                        <button type="submit" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm rounded-lg shadow transition focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            Publier le commentaire
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+</section>
+
+{% endblock %}

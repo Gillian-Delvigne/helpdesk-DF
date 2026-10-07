@@ -1,0 +1,56 @@
+{% from "macros/_form_macros.html" import input_field with context %}
+
+{% block content %}
+
+<section class="bg-white flex flex-col grow">
+
+    <div class="flex items-center mx-auto my-8 w-full">
+
+        <div class="mx-auto w-2/3 xl:w-1/2 px-12 py-8 bg-gray-100 rounded-md shadow-xl h-fit">
+
+            <div>
+                <h2 class="text-2xl">
+                    Ajouter un fichier
+                </h2>
+
+                <hr class="px-12 mt-2 text-gray-300">
+            </div>
+
+            <!-- MODIFICATION : Ajout de enctype pour autoriser le téléversement de fichiers -->
+            <form method="POST" action="{{ url_for('attachment_create', ticket_id=ticket_id) }}" enctype="multipart/form-data" class="flex flex-col">
+
+                {{ form.hidden_tag() }}
+
+                <div class="p-6">
+                    <label
+                        for="{{form.attachment.id}}"
+                        class="block mb-2 font-medium text-gray-700"
+                    >Sélectionnez un fichier</label>
+
+                    {{ form.attachment(
+                        class="block w-full text-sm text-gray-700 border border-gray-300 rounded-lg cursor-pointer bg-white focus:outline-none",
+                        accept=".pdf,.png,.jpg,.jpeg"
+                    )}}
+
+                    {% if form.attachment.errors %}
+                        <div class="mt-2 text-sm text-red-600"> {% for error in form.attachment.errors %} <p>{{ error }}</p> {% endfor %} </div>
+                    {% endif %}
+                </div>
+
+                <button
+                    type="submit"
+                    class="bg-indigo-600 hover:bg-indigo-800 text-white font-bold py-2 px-4 rounded inline-flex items-center w-fit mx-auto my-6"
+                >
+                    <span>Téléverser le fichier</span>
+
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}

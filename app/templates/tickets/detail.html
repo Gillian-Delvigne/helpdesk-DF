@@ -1,0 +1,237 @@
+{% from "macros/_form_macros.html" import input_field, select_field %}
+
+{% extends "layout/main_layout.html" %}
+
+{% block content %}
+
+<section class="bg-gray-50/50 flex flex-col grow py-8 px-4 sm:px-8">
+    <div class="max-w-5xl w-full mx-auto space-y-6">
+
+        <!-- Top Navigation / Breadcrumb -->
+        <div class="flex items-center justify-between">
+            <a href="{{ url_for('display_all_tickets') }}"
+                class="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                <span>Back to Tickets</span>
+            </a>
+
+            <span class="text-sm font-mono text-gray-400">Ticket #{{ ticket.ticket_id }}</span>
+        </div>
+
+        <!-- Main Ticket Header Card -->
+        <div class="bg-white rounded-xl border border-gray-200/80 shadow-sm p-6 sm:p-8">
+            <div class="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-gray-100">
+                <div>
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-indigo-600">Ticket
+                            Details</span>
+                        <span class="text-gray-300">•</span>
+                        <span class="text-xs text-gray-500">ID: {{ ticket.ticket_id }}</span>
+                    </div>
+                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight">
+                        {{ ticket.ticket_title }}
+                    </h1>
+                </div>
+
+                <!-- Badges -->
+                <div class="flex flex-wrap items-center gap-2">
+                    <!-- Status Badge -->
+                    {% set status_color = 'bg-blue-50 text-blue-700 border-blue-200' %}
+                    {% if ticket.ticket_status.value == 'IN_PROGRESS' %}
+                    {% set status_color = 'bg-amber-50 text-amber-700 border-amber-200' %}
+                    {% elif ticket.ticket_status.value == 'RESOLVED' or ticket.ticket_status.value == 'CLOSED' %}
+                    {% set status_color = 'bg-emerald-50 text-emerald-700 border-emerald-200' %}
+                    {% endif %}
+                    <span
+                        class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold border {{ status_color }}">
+                        {{ ticket.ticket_status.label_fr }}
+                    </span>
+
+                    <!-- Category Badge -->
+                    {% if ticket.ticket_category %}
+                    <span
+                        class="inline-flex items-center rounded-md bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 border border-gray-200/60">
+                        {{ ticket.ticket_category.category_name }}
+                    </span>
+                    {% endif %}
+
+                    <!-- Priority Badge -->
+                    {% if ticket.ticket_priority %}
+                    <span
+                        class="inline-flex items-center rounded-md px-3 py-1 text-xs font-medium border {% if 'urgent' in ticket.ticket_priority.priority_name|lower or 'high' in ticket.ticket_priority.priority_name|lower %}bg-rose-50 text-rose-700 border-rose-200{% else %}bg-purple-50 text-purple-700 border-purple-200{% endif %}">
+                        Priority: {{ ticket.ticket_priority.priority_name }}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="pt-6">
+                <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Description</h2>
+                <div
+                    class="text-gray-700 leading-relaxed whitespace-pre-line text-sm sm:text-base bg-gray-50/50 p-4 rounded-lg border border-gray-100">
+                    {{ ticket.ticket_description }}
+                </div>
+            </div>
+
+            <!-- Metadata Grid -->
+            <div
+                class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-gray-100 text-sm">
+                <div>
+                    <span class="text-xs text-gray-400 font-medium block">Author ID</span>
+                    <span class="font-semibold text-gray-800">#{{ ticket.ticket_author_id or 'Unknown' }}</span>
+                </div>
+                <!-- Find way to get Author Name from ticket (query in controller/service ?)-->
+                <div>
+                    <span class="text-xs text-gray-400 font-medium block">Author Name</span>
+                    <span class="font-semibold text-gray-800">{{ author.firstname + " " + author.lastname}}</span>
+                </div>
+                <div>
+                    <span class="text-xs text-gray-400 font-medium block">Assigned Technician</span>
+                    <span class="font-semibold text-gray-800">{{ ticket.ticket_technician_id or 'Unassigned' }}</span>
+                </div>
+                <div>
+                    <span class="text-xs text-gray-400 font-medium block">Due Date</span>
+                    <span class="font-semibold text-gray-800">
+                        {% if ticket.ticket_due_date %}
+                        {{ ticket.ticket_due_date.strftime('%b %d, %Y - %H:%M') if ticket.ticket_due_date.strftime is
+                        defined else ticket.ticket_due_date }}
+                        {% else %}
+                        No due date
+                        {% endif %}
+                    </span>
+                </div>
+                <div>
+                    <span class="text-xs text-gray-400 font-medium block">Comments Count</span>
+                    <span class="font-semibold text-indigo-600">{{ ticket.ticket_comments|length }} comments</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ticket Actions Section -->
+        <div class="bg-white rounded-xl border border-gray-200/80 shadow-sm p-6">
+            <div class="flex items-center justify-between pb-4 border-b border-gray-100 mb-4">
+                <h2 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                    Ticket Actions
+                </h2>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3">
+                <a href="{{ url_for('comment_list', ticket_id=ticket.ticket_id) }}"
+                    class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg text-sm transition-colors shadow-sm">
+                    <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z">
+                        </path>
+                    </svg>
+                    <span>View All Comments</span>
+                    {% if ticket.ticket_comments %}
+                    <span class="bg-gray-200 text-gray-700 rounded-full px-2 py-0.5 text-xs font-bold">
+                        {{ ticket.ticket_comments|length }}
+                    </span>
+                    {% endif %}
+                </a>
+
+                <a href="{{ url_for('comment_create', ticket_id=ticket.ticket_id) }}"
+                    class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg text-sm transition-colors shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    <span>Add Comment</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Ticket Timeline Section -->
+        <div class="bg-white rounded-xl border border-gray-200/80 shadow-sm p-6">
+            <div class="flex items-center justify-between pb-4 border-b border-gray-100 mb-4">
+                <h2 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Ticket Timeline
+                </h2>
+            </div>
+
+            {% if ticket.ticket_status_histories %}
+            <div
+                class="relative pl-6 space-y-6 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-gray-200">
+                {% for history in ticket.ticket_status_histories[::-1][:5] %}
+                <div class="relative flex items-start gap-4">
+                    <div class="absolute -left-6 mt-1 w-3 h-3 rounded-full bg-indigo-600 ring-4 ring-white"></div>
+                    <div class="bg-gray-50 rounded-lg p-3 w-full border border-gray-100">
+                        <div class="flex items-center justify-between text-xs text-gray-500">
+                            <span class="font-medium text-gray-700">Status changed to <strong class="text-indigo-600">{{
+                                    history.new_status }}</strong></span>
+                            <span>{{ history.created_at.strftime('%b %d, %Y - %H:%M') if history.created_at.strftime is
+                                defined else history.created_at }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            {% else %}
+            <p class="text-sm text-gray-400 italic">No status changes recorded yet.</p>
+            {% endif %}
+
+
+            <a href="{{ url_for('get_history_by_ticket', ticket_id=ticket.ticket_id) }}"
+                class="inline-flex items-center gap-2 px-4 py-2 mt-6 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg text-sm transition-colors shadow-sm">
+                <span>View All Status History</span>
+            </a>
+
+        </div>
+
+        <!-- Ticket Attachments Section -->
+        <div class="bg-white rounded-xl border border-gray-200/80 shadow-sm p-6">
+            <div class="flex items-center justify-between pb-4 border-b border-gray-100 mb-4">
+                <h2 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13">
+                        </path>
+                    </svg>
+                    Ticket Attachments
+                </h2>
+            </div>
+
+            {% if ticket.ticket_attachments %}
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                {% for attachment in ticket.ticket_attachments[:5] %}
+                <div
+                    class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200/60 hover:bg-gray-100/80 transition-colors">
+                    <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                        </path>
+                    </svg>
+                    <span class="text-sm font-medium text-gray-700 truncate">{{ attachment.attachment_filename or
+                        'Attachment #' ~
+                        attachment.attachment_id }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-sm text-gray-400 italic">No attachments uploaded for this ticket.</p>
+            {% endif %}
+            <div class="mt-6">
+                <a href="{{ url_for('attachment_list', ticket_id=ticket.ticket_id) }}"
+                    class="inline-flex items-center gap-2 px-4 py-2 mt-6 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg text-sm transition-colors shadow-sm">
+                    <span>View All Attachments</span>
+                </a>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}

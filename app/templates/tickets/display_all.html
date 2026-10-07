@@ -1,0 +1,182 @@
+{% extends "layout/main_layout.html" %}
+
+{% block content %}
+<section class="bg-gray-50/50 flex flex-col grow py-8 px-4 sm:px-6 lg:px-8">
+    <!-- Header Section -->
+    <div class="max-w-7xl w-full mx-auto mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-3">
+                <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Tickets</h1>
+                <span
+                    class="inline-flex items-center rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-semibold text-indigo-700 border border-indigo-200">
+                    {{ tickets|length }} total
+                </span>
+            </div>
+            <p class="mt-1 text-sm text-gray-500">Manage and track all support tickets in one place.</p>
+        </div>
+        <div>
+            <a href="{{ url_for('create_ticket') }}"
+                class="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 transition-all duration-150">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Create Ticket
+            </a>
+        </div>
+    </div>
+
+    <!-- Cards Grid Section -->
+    <div class="max-w-7xl w-full mx-auto">
+        {% if tickets %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for ticket in tickets %}
+            <div
+                class="bg-white rounded-xl border border-gray-200/80 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col justify-between overflow-hidden">
+                <!-- Card Header & Content -->
+                <div class="p-6">
+                    <!-- Badges Row: Category & Status -->
+                    <div class="flex items-center justify-between gap-2 mb-3">
+                        {% if ticket.ticket_category %}
+                        <span
+                            class="inline-flex items-center rounded-md bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700">
+                            {{ ticket.ticket_category.category_name }}
+                        </span>
+                        {% else %}
+                        <span
+                            class="inline-flex items-center rounded-md bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-500">
+                            Uncategorized
+                        </span>
+                        {% endif %}
+
+                        <!-- Status Badge -->
+                        <!-- {% set status_color = 'bg-blue-50 text-blue-700 border-blue-200' %}
+                            {% if ticket.ticket_status|lower == 'in progress' or ticket.ticket_status|lower == 'en
+                            cours' %}
+                            {% set status_color = 'bg-amber-50 text-amber-700 border-amber-200' %}
+                            {% elif ticket.ticket_status|lower == 'resolved' or ticket.ticket_status|lower == 'closed'
+                            or
+                            ticket.ticket_status|lower == 'résolu' %}
+                            {% set status_color = 'bg-emerald-50 text-emerald-700 border-emerald-200' %}
+                            {% endif %}
+                            <span
+                                class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium border {{ status_color }}">
+                                {{ ticket.ticket_status }}
+                            </span> -->
+                        <form method="POST" action="{{ url_for('update_ticket_status', ticket_id=ticket.ticket_id) }}"
+                            onclick="event.stopPropagation();">
+
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <select name="status" onchange="this.form.submit()" onclick="event.stopPropagation();"
+                                class="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium border bg-white text-gray-700 border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="NEW" {% if ticket.ticket_status.name=='NEW' %}selected{% endif %}>
+                                    Nouveau
+                                </option>
+
+                                <option value="IN_PROGRESS" {% if ticket.ticket_status.name=='IN_PROGRESS' %}selected{%
+                                    endif %}>
+                                    En Cours
+                                </option>
+
+                                <option value="BLOCKED" {% if ticket.ticket_status.name=='BLOCKED' %}selected{% endif
+                                    %}>
+                                    Bloqué
+                                </option>
+
+                                <option value="RESOLVED" {% if ticket.ticket_status.name=='RESOLVED' %}selected{% endif
+                                    %}>
+                                    Résolu
+                                </option>
+
+                                <option value="CLOSED" {% if ticket.ticket_status.name=='CLOSED' %}selected{% endif %}>
+                                    Closed
+                                </option>
+
+                            </select>
+                        </form>
+
+                    </div>
+                    <a href="{{ url_for('ticket_detail', ticket_id=ticket.ticket_id) }}">
+
+                        <!-- Ticket Title -->
+                        <h2
+                            class="text-lg font-semibold text-gray-900 line-clamp-1 group-hover:text-indigo-600 transition-colors">
+                            {{ ticket.ticket_title }}
+                        </h2>
+
+                        <!-- Ticket Description -->
+                        <p class="mt-2 text-sm text-gray-600 line-clamp-3 leading-relaxed">
+                            {{ ticket.ticket_description }}
+                        </p>
+
+                    </a>
+
+                </div>
+
+                <!-- Metadata Row (Priority & Due Date) -->
+                <div
+                    class="px-6 py-3 bg-gray-50/80 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
+                    <!-- Priority -->
+                    <div class="flex items-center gap-1.5">
+                        <span class="font-medium text-gray-600">Priority:</span>
+                        {% if 'urgent' in ticket.ticket_priority.priority_name|lower
+                        or 'high' in ticket.ticket_priority.priority_name|lower
+                        or 'haute' in ticket.ticket_priority.priority_name|lower %}
+
+                        <span class="font-semibold text-rose-600">
+                            {{ ticket.ticket_priority.priority_name }}
+                        </span>
+
+                        {% else %}
+
+                        <span class="font-medium text-gray-700">
+                            {{ ticket.ticket_priority.priority_name }}
+                        </span>
+
+                        {% endif %}
+                    </div>
+
+                    <!-- Due Date -->
+                    {% if ticket.ticket_due_date %}
+                    <div class="flex items-center gap-1 text-gray-500">
+                        <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+                            </path>
+                        </svg>
+                        <span>{{ ticket.ticket_due_date.strftime('%b %d, %Y') if ticket.ticket_due_date.strftime is
+                            defined else ticket.ticket_due_date }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Action Bar: View & Add Comments -->
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <!-- Empty State -->
+        <div
+            class="text-center py-16 px-4 bg-white rounded-2xl border border-dashed border-gray-300 max-w-md mx-auto my-8">
+            <div class="mx-auto w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center mb-4">
+                <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                    </path>
+                </svg>
+            </div>
+            <h3 class="text-base font-semibold text-gray-900">No tickets found</h3>
+            <p class="mt-1 text-sm text-gray-500">Get started by creating your first support ticket.</p>
+            <div class="mt-6">
+                <a href="{{ url_for('create_ticket') }}"
+                    class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    Create Ticket
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
